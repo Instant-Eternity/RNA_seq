@@ -123,4 +123,102 @@ time samtools index $sam_bam/Sorted-Ctrl-5.bam
 #time samtools index $sam_bam/Name-Sorted-Ctrl-4.bam
 #time samtools index $sam_bam/Name-Sorted-Ctrl-5.bam
 
+##########################################################################
+# File Name: 04.samtools.sh
+# Author: Xianglong Zhang
+# mail: hunterfirstone@i.smu.edu.cn
+# Created Time: Mon 29 Mar 2021 10:15:45 AM CST
+#########################################################################
+#!/use/bin/bash
+#time samtools view -bS abc.sam > abc.bam
+#time samtools view -b -S abc.sam -o abc.bam
+result=/bigdata/wangzhang_guest/chenpeng_project/06_result/06_LDP_RNAseq
+mkdir $result/04_sam_to_bam
+hisat2_result=/bigdata/wangzhang_guest/chenpeng_project/06_result/06_LDP_RNAseq/03_Hisat2
+sam_bam=/bigdata/wangzhang_guest/chenpeng_project/06_result/06_LDP_RNAseq/04_sam_to_bam
+'''
+time samtools view -bS $hisat2_result/ABX-1.sam > $sam_bam/ABX-1.bam
+time samtools view -bS $hisat2_result/ABX-2.sam > $sam_bam/ABX-2.bam
+time samtools view -bS $hisat2_result/ABX-3.sam > $sam_bam/ABX-3.bam
+time samtools view -bS $hisat2_result/ABX-4.sam > $sam_bam/ABX-4.bam
+time samtools view -bS $hisat2_result/ABX-5.sam > $sam_bam/ABX-5.bam
+
+time samtools view -bS $hisat2_result/Ctrl-1.sam > $sam_bam/Ctrl-1.bam
+time samtools view -bS $hisat2_result/Ctrl-2.sam > $sam_bam/Ctrl-2.bam
+time samtools view -bS $hisat2_result/Ctrl-3.sam > $sam_bam/Ctrl-3.bam
+time samtools view -bS $hisat2_result/Ctrl-4.sam > $sam_bam/Ctrl-4.bam
+time samtools view -bS $hisat2_result/Ctrl-5.sam > $sam_bam/Ctrl-5.bam
+
+time samtools sort $sam_bam/ABX-1.bam -o $sam_bam/Sorted-ABX-1.bam
+time samtools sort $sam_bam/ABX-2.bam -o $sam_bam/Sorted-ABX-2.bam
+time samtools sort $sam_bam/ABX-3.bam -o $sam_bam/Sorted-ABX-3.bam
+time samtools sort $sam_bam/ABX-4.bam -o $sam_bam/Sorted-ABX-4.bam
+time samtools sort $sam_bam/ABX-5.bam -o $sam_bam/Sorted-ABX-5.bam
+
+time samtools sort $sam_bam/Ctrl-1.bam -o $sam_bam/Sorted-Ctrl-1.bam
+time samtools sort $sam_bam/Ctrl-2.bam -o $sam_bam/Sorted-Ctrl-2.bam
+time samtools sort $sam_bam/Ctrl-3.bam -o $sam_bam/Sorted-Ctrl-3.bam
+time samtools sort $sam_bam/Ctrl-4.bam -o $sam_bam/Sorted-Ctrl-4.bam
+time samtools sort $sam_bam/Ctrl-5.bam -o $sam_bam/Sorted-Ctrl-5.bam
+
+rm $hisat2_result/ABX-*.sam
+
+rm $hisat2_result/Ctrl-*.sam
+
+rm $sam_bam/ABX-*.bam
+
+rm $sam_bam/Ctrl-*.bam
+'''
+time samtools index $sam_bam/Sorted-ABX-1.bam
+time samtools index $sam_bam/Sorted-ABX-2.bam
+time samtools index $sam_bam/Sorted-ABX-3.bam
+time samtools index $sam_bam/Sorted-ABX-4.bam
+time samtools index $sam_bam/Sorted-ABX-5.bam
+
+time samtools index $sam_bam/Sorted-Ctrl-1.bam
+time samtools index $sam_bam/Sorted-Ctrl-2.bam
+time samtools index $sam_bam/Sorted-Ctrl-3.bam
+time samtools index $sam_bam/Sorted-Ctrl-4.bam
+time samtools index $sam_bam/Sorted-Ctrl-5.bam
+
+##########################################################################
+# File Name: 05.STAR.sh
+# Author: Xianglong Zhang
+# mail: hunterfirstone@i.smu.edu.cn
+# Created Time: Mon 29 Mar 2021 09:31:56 PM CST
+#########################################################################
+#!/use/bin/bash
+'''
+time STAR --runThreadN 6 \
+          --runMode genomeGenerate \
+          --genomeDir /bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/00_ref/mm10/ \
+          --genomeFastaFiles /bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/00_ref/mm.fa \
+          --sjdbGTFfile /bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/00_ref/gencode.vM26.annotation.gtf \
+          --sjdbOverhang 100
+'''
+ref=/bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/00_ref/mm10/
+data_ABX=/bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/01_ABX
+data_Ctrl=/bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/02_Ctrl
+result=/bigdata/wangzhang_guest/chenpeng_project/06_result/06_LDP_RNAseq/04_STAR
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_ABX/clp-abx-1_FRAS210074515-1r_1.clean.fq.gz $data_ABX/clp-abx-1_FRAS210074515-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/ABX-1
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_ABX/clp-abx-2_FRAS210074516-1r_1.clean.fq.gz $data_ABX/clp-abx-2_FRAS210074516-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/ABX-2
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_ABX/clp-abx-3_FRAS210074517-1r_1.clean.fq.gz $data_ABX/clp-abx-3_FRAS210074517-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/ABX-3
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_ABX/clp-abx-4_FRAS210074518-1r_1.clean.fq.gz $data_ABX/clp-abx-4_FRAS210074518-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/ABX-4
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_ABX/clp-abx-5_FRAS210074519-1r_1.clean.fq.gz $data_ABX/clp-abx-5_FRAS210074519-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/ABX-5
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_Ctrl/clp-ctrl-1_FRAS210074510-1r_1.clean.fq.gz $data_Ctrl/clp-ctrl-1_FRAS210074510-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/Ctrl-1
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_Ctrl/clp-ctrl-2_FRAS210074511-1r_1.clean.fq.gz $data_Ctrl/clp-ctrl-2_FRAS210074511-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/Ctrl-2
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_Ctrl/clp-ctrl-3_FRAS210074512-1r_1.clean.fq.gz $data_Ctrl/clp-ctrl-3_FRAS210074512-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/Ctrl-3
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_Ctrl/clp-ctrl-4_FRAS210074513-1r_1.clean.fq.gz $data_Ctrl/clp-ctrl-4_FRAS210074513-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/Ctrl-4
+
+time STAR --runThreadN 20 --genomeDir $ref --readFilesCommand gunzip -c --readFilesIn $data_Ctrl/clp-ctrl-5_FRAS210074514-1r_1.clean.fq.gz $data_Ctrl/clp-ctrl-5_FRAS210074514-1r_2.clean.fq.gz --outSAMtype BAM SortedByCoordinate --outFileNamePrefix $result/Ctrl-5
+
 
