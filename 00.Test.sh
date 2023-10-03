@@ -1,6 +1,6 @@
 ##########################################################################
 # File Name: 01.fastqc.sh
-# Author: Xianglong Zhang
+# Author: Instant-Eternity
 # mail: hunterfirstone@i.smu.edu.cn
 # Created Time: Thu 25 Mar 2021 09:28:47 AM CST
 #########################################################################
@@ -11,7 +11,7 @@ time fastqc -o /bigdata/wangzhang_guest/chenpeng_project/06_result/06_LDP_RNAseq
 
 ##########################################################################
 # File Name: 02.multiqc.sh
-# Author: Xianglong Zhang
+# Author: Instant-Eternity
 # mail: hunterfirstone@i.smu.edu.cn
 # Created Time: Mon 29 Mar 2021 10:06:21 AM CST
 #########################################################################
@@ -22,7 +22,7 @@ time multiqc $fastqc/*_fastqc.zip -o $result
 
 ##########################################################################
 # File Name: 03.hisat2.sh
-# Author: Xianglong Zhang
+# Author: Instant-Eternity
 # mail: hunterfirstone@i.smu.edu.cn
 # Created Time: Sun 28 Mar 2021 09:54:06 PM CST
 #########################################################################
