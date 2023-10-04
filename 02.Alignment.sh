@@ -64,7 +64,7 @@ if [ "$alignment" == "HISAT2" ]; then
     # Create output directories if they don't exist
     mkdir -p "$output_dir/02.HISAT2SAM"
     mkdir -p "$output_dir/02.HISAT2BAM"
-    mkdir -p "$output_dir/02.Alignment"
+    mkdir -p "$output_dir/02.HISAT2Sort"
 
     # Extract sample names and store them in an array
     samples=()
@@ -84,14 +84,14 @@ if [ "$alignment" == "HISAT2" ]; then
             -2 "$data_dir/$sample.2.clean.fq.gz" \
             -S "$output_dir/02.HISAT2SAM/$sample.sam"
         time samtools view -bS "$output_dir/02.HISAT2SAM/$sample.sam" > "$output_dir/02.HISAT2BAM/$sample.bam"
-        time samtools sort "$output_dir/02.HISAT2BAM/$sample.bam" -o "$output_dir/02.Alignment/$sample.Sorted.bam"
-        time samtools index "$output_dir/02.Alignment/$sample.Sorted.bam"
+        time samtools sort "$output_dir/02.HISAT2BAM/$sample.bam" -o "$output_dir/02.HISAT2Sort/$sample.Sorted.bam"
+        time samtools index "$output_dir/02.HISAT2Sort/$sample.Sorted.bam"
         rm -rf "$output_dir/02.HISAT2SAM"
         rm -rf "$output_dir/02.HISAT2BAM"
     done
 elif [ "$alignment" == "STAR" ]; then
     # Create output directories if they don't exist
-    mkdir -p "$output_dir/02.Alignment"
+    mkdir -p "$output_dir/02.STARSort"
 
     # Extract sample names and store them in an array
     samples=()
@@ -111,7 +111,7 @@ elif [ "$alignment" == "STAR" ]; then
             --readFilesCommand gunzip \
             -c --readFilesIn "$data_dir/$sample.1.clean.fq.gz" "$data_dir/$sample.2.clean.fq.gz" \
             --outSAMtype BAM SortedByCoordinate \
-            --outFileNamePrefix "$output_dir/02.Alignment/$sample.Sorted.bam"
+            --outFileNamePrefix "$output_dir/02.STARSort/$sample.Sorted.bam"
     done
 fi
 
