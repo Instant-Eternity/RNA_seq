@@ -64,7 +64,7 @@ if [ "$alignment" == "HISAT2" ]; then
     # Create output directories if they don't exist
     mkdir -p "$output_dir/02.HISAT2SAM"
     mkdir -p "$output_dir/02.HISAT2BAM"
-    mkdir -p "$output_dir/02.HISAT2Sort"
+    mkdir -p "$output_dir/02.Alignment"
 
     # Extract sample names and store them in an array
     samples=()
@@ -91,8 +91,7 @@ if [ "$alignment" == "HISAT2" ]; then
     done
 elif [ "$alignment" == "STAR" ]; then
     # Create output directories if they don't exist
-    mkdir -p "$output_dir/03.STARBAM"
-    mkdir -p "$output_dir/03.STARSort"
+    mkdir -p "$output_dir/02.Alignment"
 
     # Extract sample names and store them in an array
     samples=()
@@ -112,7 +111,7 @@ elif [ "$alignment" == "STAR" ]; then
             --readFilesCommand gunzip \
             -c --readFilesIn "$data_dir/$sample.1.clean.fq.gz" "$data_dir/$sample.2.clean.fq.gz" \
             --outSAMtype BAM SortedByCoordinate \
-            --outFileNamePrefix "$output_dir/03.STARSort/$sample.Sorted.bam"
+            --outFileNamePrefix "$output_dir/02.Alignment/$sample.Sorted.bam"
     done
 fi
 
