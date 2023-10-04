@@ -56,7 +56,7 @@ for dir in "$data_dir" "$output_dir"; do
 done
 
 # Create output directories if they don't exist
-    mkdir -p "$output_dir/03.StringTie"
+    mkdir -p "$output_dir/03.Assemble"
 
     # Extract sample names and store them in an array
     samples=()
