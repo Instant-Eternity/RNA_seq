@@ -5,6 +5,7 @@
 # Created Time: Sun 28 Mar 2021 09:54:06 PM CST
 #########################################################################
 #!/bin/bash
+
 # Default values for paths and species
 alignment="STAR"
 species="human"
@@ -13,7 +14,7 @@ output_dir=$PWD
 
 # Function to display usage information
 usage() {
-    echo "Usage: $(basename "$0") -s <species> -d <data_path> -o <output_directory>"
+    echo "Usage: $(basename "$0") -s <species> -d <data_path> -o <output_directory> -a <alignment_method>"
     exit 1
 }
 
@@ -32,7 +33,7 @@ while getopts ":s:d:o:a:" opt; do
                 "mouse")
                     ref="mm10"
                     ;;
-                *)  
+                *)
                     echo "Invalid species: $species" >&2
                     usage
                     ;;
@@ -63,6 +64,7 @@ if [ "$alignment" == "HISAT2" ]; then
     # Create output directories if they don't exist
     mkdir -p "$output_dir/02.HISAT2SAM"
     mkdir -p "$output_dir/02.HISAT2BAM"
+    mkdir -p "$output_dir/02.HISAT2Sort"
 
     # Extract sample names and store them in an array
     samples=()
@@ -82,14 +84,15 @@ if [ "$alignment" == "HISAT2" ]; then
             -2 "$data_dir/$sample.2.clean.fq.gz" \
             -S "$output_dir/02.HISAT2SAM/$sample.sam"
         time samtools view -bS "$output_dir/02.HISAT2SAM/$sample.sam" > "$output_dir/02.HISAT2BAM/$sample.bam"
-        time samtools sort "$output_dir/02.HISAT2BAM/$sample.bam" -o "$output_dir/02.HISAT2BAM/$sample.Sorted.bam"
-        time samtools index "$output_dir/02.HISAT2BAM/$sample.Sorted.bam"
-        rm "$output_dir/02.HISAT2SAM/$sample.sam"
-        rm "$output_dir/02.HISAT2BAM/$sample.bam"
+        time samtools sort "$output_dir/02.HISAT2BAM/$sample.bam" -o "$output_dir/02.HISAT2Sort/$sample.Sorted.bam"
+        time samtools index "$output_dir/02.HISAT2Sort/$sample.Sorted.bam"
+        rm -rf "$output_dir/02.HISAT2SAM"
+        rm -rf "$output_dir/02.HISAT2BAM"
     done
 elif [ "$alignment" == "STAR" ]; then
     # Create output directories if they don't exist
-    mkdir -p "$output_dir/03.STAR"
+    mkdir -p "$output_dir/03.STARBAM"
+    mkdir -p "$output_dir/03.STARSort"
 
     # Extract sample names and store them in an array
     samples=()
@@ -109,9 +112,8 @@ elif [ "$alignment" == "STAR" ]; then
             --readFilesCommand gunzip \
             -c --readFilesIn "$data_dir/$sample.1.clean.fq.gz" "$data_dir/$sample.2.clean.fq.gz" \
             --outSAMtype BAM SortedByCoordinate \
-            --outFileNamePrefix "$output_dir/03.STAR/$sample"
+            --outFileNamePrefix "$output_dir/03.STARSort/$sample.Sorted.bam"
     done
 fi
 
 echo "Alignment and conversion completed."
-
