@@ -6,6 +6,7 @@
 #########################################################################
 #!/bin/bash
 # Default values for paths and species
+alignment="STAR"
 species="human"
 data_dir=$PWD
 output_dir=$PWD
@@ -17,8 +18,11 @@ usage() {
 }
 
 # Parse command line options
-while getopts ":s:d:o:" opt; do
+while getopts ":s:d:o:a:" opt; do
     case $opt in
+        a)
+            alignment="$OPTARG"
+            ;;
         s)
             species="$OPTARG"
             case $species in
@@ -55,32 +59,59 @@ for dir in "$data_dir" "$output_dir"; do
     fi
 done
 
-# Create output directories if they don't exist
-mkdir -p "$output_dir/02.HISAT2"
-mkdir -p "$output_dir/02.SAMtoBAM"
+if [ "$alignment" == "HISAT2" ]; then
+    # Create output directories if they don't exist
+    mkdir -p "$output_dir/02.HISAT2SAM"
+    mkdir -p "$output_dir/02.HISAT2BAM"
 
-# Extract sample names and store them in an array
-samples=()
-for file in "$data_dir"/*.1.clean.fq.gz; do
-    # Extract the part of the filename before the dot
-    sample=$(basename "$file" | cut -d'.' -f1-2)
-    # Check if the sample is not already in the array and add it
-    if [[ ! " ${samples[@]} " =~ " ${sample} " ]]; then
-        samples+=("$sample")
-    fi
-done
+    # Extract sample names and store them in an array
+    samples=()
+    for file in "$data_dir"/*.1.clean.fq.gz; do
+        # Extract the part of the filename before the dot
+        sample=$(basename "$file" | cut -d'.' -f1-2)
+        # Check if the sample is not already in the array and add it
+        if [[ ! " ${samples[@]} " =~ " ${sample} " ]]; then
+            samples+=("$sample")
+        fi
+    done
 
-for sample in "${samples[@]}"; do
-    echo "Processing sample: $sample"
-    time hisat2 --dta -t -x $ref \
-        -1 "$data_dir/$sample.1.clean.fq.gz" \
-        -2 "$data_dir/$sample.2.clean.fq.gz" \
-        -S "$output_dir/02.HISAT2/$sample.sam"
-    time samtools view -bS "$output_dir/02.HISAT2/$sample.sam" > "$output_dir/02.SAMtoBAM/$sample.bam"
-    time samtools sort "$output_dir/02.SAMtoBAM/$sample.bam" -o "$output_dir/02.SAMtoBAM/$sample.Sorted.bam"
-    time samtools index "$output_dir/02.SAMtoBAM/$sample.Sorted.bam"
-    rm "$output_dir/02.HISAT2/$sample.sam"
-    rm "$output_dir/02.SAMtoBAM/$sample.bam"
-done
+    for sample in "${samples[@]}"; do
+        echo "Processing sample: $sample"
+        time hisat2 --dta -t -x $ref \
+            -1 "$data_dir/$sample.1.clean.fq.gz" \
+            -2 "$data_dir/$sample.2.clean.fq.gz" \
+            -S "$output_dir/02.HISAT2SAM/$sample.sam"
+        time samtools view -bS "$output_dir/02.HISAT2SAM/$sample.sam" > "$output_dir/02.HISAT2BAM/$sample.bam"
+        time samtools sort "$output_dir/02.HISAT2BAM/$sample.bam" -o "$output_dir/02.HISAT2BAM/$sample.Sorted.bam"
+        time samtools index "$output_dir/02.HISAT2BAM/$sample.Sorted.bam"
+        rm "$output_dir/02.HISAT2SAM/$sample.sam"
+        rm "$output_dir/02.HISAT2BAM/$sample.bam"
+    done
+elif [ "$alignment" == "STAR" ]; then
+    # Create output directories if they don't exist
+    mkdir -p "$output_dir/03.STAR"
 
-echo "HISAT2 alignment and SAM to BAM conversion completed."
+    # Extract sample names and store them in an array
+    samples=()
+    for file in "$data_dir"/*.1.clean.fq.gz; do
+        # Extract the part of the filename before the dot
+        sample=$(basename "$file" | cut -d'.' -f1-2)
+        # Check if the sample is not already in the array and add it
+        if [[ ! " ${samples[@]} " =~ " ${sample} " ]]; then
+            samples+=("$sample")
+        fi
+    done
+
+    for sample in "${samples[@]}"; do
+        echo "Processing sample: $sample"
+        time STAR --runThreadN 20 \
+            --genomeDir $ref \
+            --readFilesCommand gunzip \
+            -c --readFilesIn "$data_dir/$sample.1.clean.fq.gz" "$data_dir/$sample.2.clean.fq.gz" \
+            --outSAMtype BAM SortedByCoordinate \
+            --outFileNamePrefix "$output_dir/03.STAR/$sample"
+    done
+fi
+
+echo "Alignment and conversion completed."
+
