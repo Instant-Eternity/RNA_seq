@@ -84,8 +84,8 @@ if [ "$alignment" == "HISAT2" ]; then
             -2 "$data_dir/$sample.2.clean.fq.gz" \
             -S "$output_dir/02.HISAT2SAM/$sample.sam"
         time samtools view -bS "$output_dir/02.HISAT2SAM/$sample.sam" > "$output_dir/02.HISAT2BAM/$sample.bam"
-        time samtools sort "$output_dir/02.HISAT2BAM/$sample.bam" -o "$output_dir/02.HISAT2Sort/$sample.Sorted.bam"
-        time samtools index "$output_dir/02.HISAT2Sort/$sample.Sorted.bam"
+        time samtools sort "$output_dir/02.HISAT2BAM/$sample.bam" -o "$output_dir/02.Alignment/$sample.Sorted.bam"
+        time samtools index "$output_dir/02.Alignment/$sample.Sorted.bam"
         rm -rf "$output_dir/02.HISAT2SAM"
         rm -rf "$output_dir/02.HISAT2BAM"
     done
