@@ -4,11 +4,59 @@
 # mail: hunterfirstone@i.smu.edu.cn
 # Created Time: Mon 29 Mar 2021 09:31:56 PM CST
 #########################################################################
-#!/use/bin/bash
-ref=/bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/00_ref/mm10/
-data_ABX=/bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/01_ABX
-data_Ctrl=/bigdata/wangzhang_guest/chenpeng_project/01_data/07_LDP_clean_data_rnaseq/02_Ctrl
-result=/bigdata/wangzhang_guest/chenpeng_project/06_result/06_LDP_RNAseq/04_STAR
+#!/bin/bash
+# Default values for paths and species
+species="human"
+data_dir=$PWD
+output_dir=$PWD
+
+# Function to display usage information
+usage() {
+    echo "Usage: $(basename "$0") -s <species> -d <data_path> -o <output_directory>"
+    exit 1
+}
+
+# Parse command line options
+while getopts ":s:d:o:" opt; do
+    case $opt in
+        s)
+            species="$OPTARG"
+            case $species in
+                "human")
+                    ref="hg38"
+                    ;;
+                "mouse")
+                    ref="mm10"
+                    ;;
+                *)  
+                    echo "Invalid species: $species" >&2
+                    usage
+                    ;;
+            esac
+            ;;
+        d)
+            data_dir="$OPTARG"
+            ;;
+        o)
+            output_dir="$OPTARG"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            usage
+            ;;
+    esac
+done
+
+# Check if required directories exist
+for dir in "$data_dir" "$output_dir"; do
+    if [ ! -d "$dir" ]; then
+        echo "Error: Directory '$dir' not found."
+        usage
+    fi
+done
+
+# Create output directories if they don't exist
+mkdir -p "$output_dir/03.STAR"
 
 time STAR --runThreadN 20 \
 	--genomeDir $ref \
