@@ -1,5 +1,5 @@
 ##########################################################################
-# File Name: 03.STAR.sh
+# File Name: 03.Assemble.sh
 # Author: Instant-Eternity
 # mail: hunterfirstone@i.smu.edu.cn
 # Created Time: Mon 29 Mar 2021 09:31:56 PM CST
@@ -56,11 +56,24 @@ for dir in "$data_dir" "$output_dir"; do
 done
 
 # Create output directories if they don't exist
-mkdir -p "$output_dir/03.STAR"
+    mkdir -p "$output_dir/03.StringTie"
 
-time STAR --runThreadN 20 \
-	--genomeDir $ref \
- 	--readFilesCommand gunzip \
-  	-c --readFilesIn $data_ABX/clp-abx-1_FRAS210074515-1r_1.clean.fq.gz $data_ABX/clp-abx-1_FRAS210074515-1r_2.clean.fq.gz \
-	--outSAMtype BAM SortedByCoordinate \
- 	--outFileNamePrefix $result/ABX-1
+    # Extract sample names and store them in an array
+    samples=()
+    for file in "$data_dir"/*.1.clean.fq.gz; do
+        # Extract the part of the filename before the dot
+        sample=$(basename "$file" | cut -d'.' -f1-2)
+        # Check if the sample is not already in the array and add it
+        if [[ ! " ${samples[@]} " =~ " ${sample} " ]]; then
+            samples+=("$sample")
+        fi
+    done
+
+    for sample in "${samples[@]}"; do
+        echo "Processing sample: $sample"
+        time stringtie $input/$sample.Sorted.bam -l $sample \
+			-o $result/$sample/$sample.gtf \
+   			-p 28 -G $ref \
+	  		-A $result/$sample/$sample.gene_abund.tab \
+	 		-B -e 
+    done
