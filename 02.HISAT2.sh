@@ -77,6 +77,10 @@ for sample in "${samples[@]}"; do
         -2 "$data_dir/$sample.2.clean.fq.gz" \
         -S "$output_dir/02.HISAT2/$sample.sam"
     time samtools view -bS "$output_dir/02.HISAT2/$sample.sam" > "$output_dir/02.SAMtoBAM/$sample.bam"
+    time samtools sort "$output_dir/02.SAMtoBAM/$sample.bam" -o "$output_dir/02.SAMtoBAM/$sample.Sorted.bam"
+    time samtools index "$output_dir/02.SAMtoBAM/$sample.Sorted.bam"
+    rm "$output_dir/02.HISAT2/$sample.sam"
+    rm "$output_dir/02.SAMtoBAM/$sample.bam"
 done
 
 echo "HISAT2 alignment and SAM to BAM conversion completed."
