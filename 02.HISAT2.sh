@@ -7,28 +7,26 @@
 #!/bin/bash
 # Default values for paths and species
 species="human"
-ref="hg38"
-data=$PWD
+data_dir=$PWD
 output_dir=$PWD
-sam_bam_dir="$output_dir/04_sam_to_bam"
 
 # Function to display usage information
 usage() {
-    echo "Usage: $(basename "$0") -s <species> -a <abx_data_path> -c <ctrl_data_path> -o <output_directory>"
+    echo "Usage: $(basename "$0") -s <species> -d <data_path> -o <output_directory>"
     exit 1
 }
 
 # Parse command line options
-while getopts ":s:a:c:o:" opt; do
+while getopts ":s:d:o:" opt; do
     case $opt in
         s)
             species="$OPTARG"
             case $species in
                 "human")
-                    ref="/path/to/human_reference"
+                    ref="hg38"
                     ;;
                 "mouse")
-                    ref="/path/to/mouse_reference"
+                    ref="mm10"
                     ;;
                 *)  
                     echo "Invalid species: $species" >&2
@@ -36,15 +34,11 @@ while getopts ":s:a:c:o:" opt; do
                     ;;
             esac
             ;;
-        a)
-            data_ABX="$OPTARG"
-            ;;
-        c)
-            data_Ctrl="$OPTARG"
+        d)
+            data_dir="$OPTARG"
             ;;
         o)
             output_dir="$OPTARG"
-            sam_bam_dir="$output_dir/04_sam_to_bam"
             ;;
         \?)
             echo "Invalid option: -$OPTARG" >&2
@@ -54,15 +48,35 @@ while getopts ":s:a:c:o:" opt; do
 done
 
 # Check if required directories exist
-for dir in "$ref" "$data_ABX" "$data_Ctrl" "$output_dir" "$sam_bam_dir"; do
+for dir in "$data_dir" "$output_dir"; do
     if [ ! -d "$dir" ]; then
         echo "Error: Directory '$dir' not found."
         usage
     fi
 done
 
-# Rest of your script remains unchanged
+# Create output directories if they don't exist
+mkdir -p "$output_dir/02.HISAT2"
+mkdir -p "$output_dir/02.SAMtoBAM"
 
-# Example usage:
-# ./03.hisat2.sh -s human -a /path/to/abx_data -c /path/to/ctrl_data -o /path/to/output_directory
-# ./03.hisat2.sh -s mouse -a /path/to/abx_data -c /path/to/ctrl_data -o /path/to/output_directory
+# Extract sample names and store them in an array
+samples=()
+for file in "$data_dir"/*.1.clean.fq.gz; do
+    # Extract the part of the filename before the dot
+    sample=$(basename "$file" | cut -d'.' -f1-2)
+    # Check if the sample is not already in the array and add it
+    if [[ ! " ${samples[@]} " =~ " ${sample} " ]]; then
+        samples+=("$sample")
+    fi
+done
+
+for sample in "${samples[@]}"; do
+    echo "Processing sample: $sample"
+    time hisat2 --dta -t -x $ref \
+        -1 "$data_dir/$sample.1.clean.fq.gz" \
+        -2 "$data_dir/$sample.2.clean.fq.gz" \
+        -S "$output_dir/02.HISAT2/$sample.sam"
+    time samtools view -bS "$output_dir/02.HISAT2/$sample.sam" > "$output_dir/02.SAMtoBAM/$sample.bam"
+done
+
+echo "HISAT2 alignment and SAM to BAM conversion completed."
