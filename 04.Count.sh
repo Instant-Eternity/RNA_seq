@@ -5,7 +5,6 @@
 # Created Time: Sun 30 May 2021 12:10:20 PM CST
 #########################################################################
 #!/bin/bash
-
 # Default values for paths and species
 input_dir=$PWD
 output_dir=$PWD
