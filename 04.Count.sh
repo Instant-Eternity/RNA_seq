@@ -27,7 +27,7 @@ while getopts ":s:a:i:o:" opt; do
                     alignment="02.HISAT2Sort"
                     ;;
                 "star")
-                    alignment="03.STARSort"
+                    alignment="02.STARSort"
                     ;;
                 *)
                     echo "Invalid alignment type: $alignment" >&2
