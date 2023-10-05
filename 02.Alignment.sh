@@ -5,7 +5,6 @@
 # Created Time: Sun 28 Mar 2021 09:54:06 PM CST
 #########################################################################
 #!/bin/bash
-
 # Default values for paths and species
 alignment="STAR"
 species="human"
