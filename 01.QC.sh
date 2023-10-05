@@ -5,7 +5,6 @@
 # Created Time: Thu 25 Mar 2021 09:28:47 AM CST
 #########################################################################
 #!/bin/bash
-
 # Default output path for FastQC and MultiQC reports
 output_path=$PWD
 
