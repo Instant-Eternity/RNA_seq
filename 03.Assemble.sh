@@ -52,7 +52,7 @@ fi
 mkdir -p "$output_dir/03.StringTie"
 
 # Perform StringTie assembly for each sample
-while IFS= read -r "$output_dir/sample.list"; do
+while IFS= read -r sample; do
     echo "Processing sample: $sample"
     time stringtie "$input_dir/$sample.Sorted.bam" -l "$sample" \
         -o "$output_dir/03.StringTie/$sample/$sample.gtf" \
