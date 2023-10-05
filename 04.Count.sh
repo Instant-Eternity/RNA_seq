@@ -9,16 +9,48 @@
 # Default values for paths and species
 input_dir=$PWD
 output_dir=$PWD
-#ref=04_ref_mm39/gencode.vM27.annotation.gtf
+species="human"
+alignment="02.HISAT2Sort"
+
 # Function to display usage information
 usage() {
-    echo "Usage: $(basename "$0") -i <input_directory> -o <output_directory>"
+    echo "Usage: $(basename "$0") -i <input_directory> -o <output_directory> -a <alignment_type> -s <species>"
     exit 1
 }
 
 # Parse command line options
-while getopts ":i:o:" opt; do
+while getopts ":s:a:i:o:" opt; do
     case $opt in
+        a)
+            alignment="$OPTARG"
+            case $alignment in
+                "hisat2")
+                    alignment="02.HISAT2Sort"
+                    ;;
+                "star")
+                    alignment="03.STARSort"
+                    ;;
+                *)
+                    echo "Invalid alignment type: $alignment" >&2
+                    usage
+                    ;;
+            esac
+            ;;
+        s)
+            species="$OPTARG"
+            case $species in
+                "human")
+                    ref="human.gtf"
+                    ;;
+                "mouse")
+                    ref="gencode.vM27.annotation.gtf"
+                    ;;
+                *)
+                    echo "Invalid species: $species" >&2
+                    usage
+                    ;;
+            esac
+            ;;
         i)
             input_dir="$OPTARG"
             ;;
@@ -33,12 +65,10 @@ while getopts ":i:o:" opt; do
 done
 
 # Check if required directories exist
-for dir in "$input_dir" "$output_dir"; do
-    if [ ! -d "$dir" ]; then
-        echo "Error: Directory '$dir' not found."
-        usage
-    fi
-done
+if [ ! -d "$input_dir" ] || [ ! -d "$output_dir" ]; then
+    echo "Error: Input or output directory not found."
+    usage
+fi
 
 # Create output directories if they don't exist
 mkdir -p "$output_dir/04.Count"
@@ -54,10 +84,10 @@ for file in "$input_dir"/*.Sorted.bam; do
     fi
 done
 
-# Perform StringTie assembly for each sample
+# Perform HTSeq-count for each sample
 for sample in "${samples[@]}"; do
     echo "Processing sample: $sample"
-    time htseq-count -r pos -f bam $output_dir/02.HISAT2Sort/$sample.Sorted.bam $ref > $output_dir/04.Count/$sample.count
+    htseq-count -r pos -f bam "$output_dir/$alignment/$sample.Sorted.bam" "$ref" > "$output_dir/04.Count/$sample.count"
 done
 
-echo "StringTie assembly completed."
+echo "HTSeq-count completed."
