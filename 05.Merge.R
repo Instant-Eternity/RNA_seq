@@ -49,5 +49,36 @@ if (length(options$input-path) == 0 || length(options$sample-list) == 0 || lengt
 
 # Access the parameters
 input-path <- options$input-path
-sample-list <- options$sample-list
+#sample-list <- options$sample-list
 output-path <- options$output-path
+
+sample_list <- read.table("options$sample-list", header = FALSE, stringsAsFactors = FALSE)
+
+# Create empty list to store sample objects
+sample_objects <- list()
+
+# Loop through the sample list and create objects
+for (i in 1:nrow(sample_list)) {
+    sample_name <- sample_list[i, 1]
+	
+	
+    # Read data or perform operations based on sample_path
+    # For example:
+    # sample_data <- read.csv(sample_path)
+    
+    # Create an object based on sample_name and sample_data
+    # sample_object <- ...
+    
+    # Add the sample object to the list
+    # sample_objects[[sample_name]] <- sample_object
+}
+
+# Merge sample objects
+merged_object <- merge(sample_objects[[1]], sample_objects[[2]], by = "common_column_name", all = TRUE)
+
+# Continue merging with other sample objects if needed
+# merged_object <- merge(merged_object, sample_objects[[3]], by = "common_column_name", all = TRUE)
+# ...
+
+# Print or save the merged object
+print(merged_object)
