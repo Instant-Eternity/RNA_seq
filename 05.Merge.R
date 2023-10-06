@@ -48,37 +48,35 @@ if (length(options$input-path) == 0 || length(options$sample-list) == 0 || lengt
 }
 
 # Access the parameters
-input-path <- options$input-path
-#sample-list <- options$sample-list
-output-path <- options$output-path
+input_path <- options$input-path
+sample_list_path <- options$sample-list
+output_path <- options$output-path
 
-sample_list <- read.table("options$sample-list", header = FALSE, stringsAsFactors = FALSE)
+# Read sample list file
+sample_list <- read.table(sample_list_path, header = FALSE, stringsAsFactors = FALSE)
 
 # Create empty list to store sample objects
 sample_objects <- list()
 
 # Loop through the sample list and create objects
-for (i in 1:nrow(sample_list)) {
+for (i in 1:(nrow(sample_list) - 1)) {
     sample_name <- sample_list[i, 1]
-	
-	
-    # Read data or perform operations based on sample_path
-    # For example:
-    # sample_data <- read.csv(sample_path)
-    
-    # Create an object based on sample_name and sample_data
-    # sample_object <- ...
-    
+    sample_object <- read.table(paste0(input_path, "/", sample_name, ".count"), 
+                                sep = "\t",
+                                col.names = c("gene_id", sample_name))
     # Add the sample object to the list
-    # sample_objects[[sample_name]] <- sample_object
+    sample_objects[[sample_name]] <- sample_object
 }
 
 # Merge sample objects
-merged_object <- merge(sample_objects[[1]], sample_objects[[2]], by = "common_column_name", all = TRUE)
+merged_object <- sample_objects[[1]]
 
-# Continue merging with other sample objects if needed
-# merged_object <- merge(merged_object, sample_objects[[3]], by = "common_column_name", all = TRUE)
-# ...
+for (i in 2:(length(sample_objects))) {
+    merged_object <- merge(merged_object, sample_objects[[i]], by = "gene_id", all = TRUE)
+}
 
-# Print or save the merged object
-print(merged_object)
+ENSEMBL <- gsub("\\.\\d*", "", Raw_count_filt$gene_id) 
+row.names(Raw_count_filt) <- ENSEMBL
+head(merged_object)
+
+saveRDS(merged_object, paste0(output_path, "/01.MergeData.rds")
